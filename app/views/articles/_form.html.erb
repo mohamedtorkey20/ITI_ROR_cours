@@ -19,7 +19,7 @@
   <%= form.label :status %><br>
   <%= form.select :status, Visible::VALID_STATUSES, selected: article.status || 'public' %>
 </div>
-
+ <%= form.file_field :avatar %>
   <div>
     <%= form.submit %>
   </div>

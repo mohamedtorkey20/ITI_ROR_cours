@@ -1,7 +1,13 @@
 <h1><%= @article.title %></h1>
 
 <p><%= @article.body %></p>
+<p>avatar</p>
 
+<%= image_tag @article.avatar if @article.avatar.attached? %>
+
+
+
+<% if user_signed_in? %>
 <ul>
   <li><%= link_to "Edit", edit_article_path(@article) %></li>
   <li><%= link_to "Destroy", article_path(@article), data: {
@@ -9,6 +15,12 @@
                     turbo_confirm: "Are you sure?"
                   } %></li>
 </ul>
+
+
+    <%= link_to "Report", report_article_path(@article), data: {
+      turbo_method: :post,
+      turbo_confirm: "Are you sure?"} %>
+<% end %>
 
 <h2>Comments</h2>
 <%= render @article.comments %>

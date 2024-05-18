@@ -1,29 +1,36 @@
 class ArticlesController < ApplicationController
   http_basic_authenticate_with name: "dhh", password: "secret", except: [:index, :show]
-  def index
-    @articles = Article.all
-  end
+  before_action :authenticate_user!
+  before_action :set_article, only: [:show, :edit, :update, :destroy]
+ 
 
+  def index
+      @articles = Article.where(status: 'public')
+    
+  end
+  
+  
   def show
-    @article = Article.find(params[:id])
+      @article = Article.find(params[:id])
   end
 
   def new
-    @article = Article.new
+    @article = current_user.articles.build
   end
 
   def create
-    @article = Article.new(article_params)
-
+    @article = current_user.articles.build(article_params)
+    @article.reports_count ||= 0
     if @article.save
-      redirect_to @article
+      redirect_to @article, notice: 'Article was successfully created.'
     else
-      render :new, status: :unprocessable_entity
+      render :new
     end
   end
+  
 
   def edit
-    @article = Article.find(params[:id])
+    redirect_to articles_path, alert: "Access Denied" unless @article.user_id == current_user.id
   end
 
   def update
@@ -44,21 +51,23 @@ class ArticlesController < ApplicationController
     redirect_to root_path, status: :see_other
   end
 
+  def report
+    @article = Article.find(params[:id])
+    @article.increment!(:reports_count)
+
+    if @article.reports_count >= 3
+      @article.update(status: "archived")
+    end
+    redirect_to root_path, notice: "Article reported successfully."
+  end
+
   private
+
+  def set_article
+    @article = Article.find(params[:id])
+  end
+
   def article_params
-    params.require(:article).permit(:title, :body, :status)
+    params.require(:article).permit(:title, :body, :status,:avatar)
   end
-
-
-end
-
-
-class ArticlesController < ApplicationController
-  http_basic_authenticate_with name: "dhh", password: "secret", except: [:index, :show]
-
-  def index
-    @articles = Article.all
-  end
-
-  # snippet for brevity
 end

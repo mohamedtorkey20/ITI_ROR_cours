@@ -11,11 +11,20 @@ Rails.application.routes.draw do
 end
 
 Rails.application.routes.draw do
+  devise_for :users, controllers: {
+    sessions: 'users/sessions'
+  }
   root "articles#index"
+
+  # Root path
+
 
 
   resources :articles do
     resources :comments
+    member do 
+      post 'report', to: "articles#report"
+    end
   end
 
 end
